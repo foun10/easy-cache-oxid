@@ -1,0 +1,60 @@
+{
+    // Mutation testing for the shop-independent core logic.
+    //
+    // Deliberately limited to src/Core: that is the only part the unit suite reaches.
+    // Including all of src/ would make the metrics consist almost entirely of uncovered
+    // mutants (the extensions need an activated module and a running shop) and say
+    // nothing useful about the tests that exist.
+    //
+    // Infection runs as a PHAR rather than a require-dev dependency: it needs PHP 8.1+
+    // while this module supports PHP 7.4 upwards - as require-dev it would break
+    // dependency resolution across the lower half of the CI matrix.
+    "source": {
+        "directories": [
+            "src/Core"
+        ],
+        "excludes": [
+            // Every method here is a database round-trip, so the class is covered by the
+            // integration suite instead. Mutating it would only produce uncovered mutants.
+            "EasyCacheStats.php"
+        ]
+    },
+    "mutators": {
+        "@default": true,
+
+        // The seams exist to be overridden by tests and by subclasses - that is their whole
+        // purpose - so tightening them to private is not a mutant the suite can kill without
+        // giving up the extension point.
+        "ProtectedVisibility": {
+            "ignore": [
+                "foun10\\EasyCache\\Core\\EasyCache::getStorage",
+                "foun10\\EasyCache\\Core\\EasyCache::getStatsStore",
+                "foun10\\EasyCache\\Core\\EasyCache::getCacheDir",
+                "foun10\\EasyCache\\Core\\EasyCache::getModuleSettingBoolean",
+                "foun10\\EasyCache\\Core\\EasyCache::getModuleSettingString",
+                "foun10\\EasyCache\\Core\\EasyCache::getModuleSettingCollection",
+                "foun10\\EasyCache\\Core\\EasyCache::isAdminMode",
+                "foun10\\EasyCache\\Core\\EasyCache::getShopId",
+                "foun10\\EasyCache\\Core\\EasyCache::getRequestParameter",
+                "foun10\\EasyCache\\Core\\EasyCache::getSession",
+                "foun10\\EasyCache\\Core\\EasyCache::getUntranslatableFields",
+
+                // Internal helpers of isRequestCacheable(). They could be private today,
+                // but they are the natural override points for a shop that needs a
+                // different eligibility rule (see the README section on extending the
+                // module), so tightening them is not a mutant the suite should kill.
+                "foun10\\EasyCache\\Core\\EasyCache::isControllerWhitelisted",
+                "foun10\\EasyCache\\Core\\EasyCache::hasExcludedParams"
+            ]
+        }
+    },
+    // The gate in composer.json sits at 58 % covered MSI, just under where the suite stands
+    // today (60 %). It exists to stop regressions, not to certify the code as done - raise it
+    // whenever the number rises. The remaining survivors are concentrated in FileCacheStorage's
+    // path building and in log/format string concatenation, where pinning the exact mutant
+    // costs more than it proves.
+    "logs": {
+        "text": "infection.log"
+    },
+    "tmpDir": ".infection"
+}

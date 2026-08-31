@@ -1,0 +1,116 @@
+[{include file="headitem.tpl" title="foun10 EasyCache"}]
+
+<style>
+    .foun10ec-wrap { padding: 4px 14px 20px; }
+    .foun10ec-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .foun10ec-header h1 { margin: 0; }
+    .foun10ec-badge { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: .03em; }
+    .foun10ec-badge-on { background: #dff0d8; color: #3c763d; border: 1px solid #b2d8a8; }
+    .foun10ec-badge-off { background: #f2f2f2; color: #777; border: 1px solid #ddd; }
+    .foun10ec-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; padding: 14px 16px; margin-bottom: 16px; }
+    .foun10ec-card h2 { font-size: 14px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: .03em; color: #555; }
+    .foun10ec-toggle-row { display: flex; align-items: flex-start; gap: 10px; padding: 4px 0; }
+    .foun10ec-toggle-row input[type="checkbox"] { margin-top: 3px; }
+    .foun10ec-toggle-label { font-weight: bold; }
+    .foun10ec-field-row { padding: 4px 0; }
+    .foun10ec-ttl-input { width: 140px; margin-top: 4px; }
+    .foun10ec-whitelist-input { width: 420px; max-width: 100%; margin-top: 4px; }
+    .foun10ec-hint { color: #777; font-size: 12px; margin: 2px 0 0; }
+    .foun10ec-hint-warn { color: #8a6d3b; background: #fcf8e3; border: 1px solid #faebcc; padding: 6px 8px; border-radius: 3px; margin-top: 6px; display: block; }
+    .foun10ec-actions { margin-top: 12px; }
+    .foun10ec-msg { padding: 8px 12px; border-radius: 3px; margin-bottom: 14px; }
+    .foun10ec-msg-success { background: #dff0d8; color: #3c763d; border: 1px solid #b2d8a8; }
+    .foun10ec-intro { color: #555; max-width: 780px; line-height: 1.5; margin: 0 0 16px; }
+</style>
+
+<div class="foun10ec-wrap">
+    <div class="foun10ec-header">
+        <h1>[{oxmultilang ident="FOUN10_EASYCACHE"}]</h1>
+        [{if $easyCacheEnabled}]
+            <span class="foun10ec-badge foun10ec-badge-on">[{oxmultilang ident="EC_STATUS_ENABLED"}]</span>
+        [{else}]
+            <span class="foun10ec-badge foun10ec-badge-off">[{oxmultilang ident="EC_STATUS_DISABLED"}]</span>
+        [{/if}]
+    </div>
+
+    <p class="foun10ec-intro">[{oxmultilang ident="EC_INTRO_TEXT"}]</p>
+
+    [{if $easyCacheLastAction == "save"}]
+        <div class="foun10ec-msg foun10ec-msg-success">[{oxmultilang ident="EC_MSG_SAVED"}]</div>
+    [{/if}]
+
+    <form action="[{$oViewConf->getSelfLink()}]" method="post">
+        [{$oViewConf->getHiddenSid()}]
+        <input type="hidden" name="cl" value="[{$oViewConf->getActiveClassName()}]">
+        <input type="hidden" name="fnc" value="save">
+
+        <div class="foun10ec-card">
+            <h2>[{oxmultilang ident="EC_SECTION_GENERAL"}]</h2>
+
+            <div class="foun10ec-toggle-row">
+                <input type="hidden" name="foun10EasyCacheEnabled" value="0">
+                <input type="checkbox" id="foun10EasyCacheEnabled" name="foun10EasyCacheEnabled" value="1" [{if $easyCacheEnabled}]checked[{/if}]>
+                <label for="foun10EasyCacheEnabled">
+                    <span class="foun10ec-toggle-label">[{oxmultilang ident="EC_LABEL_ENABLED"}]</span>
+                </label>
+            </div>
+
+            <div class="foun10ec-field-row">
+                <label for="foun10EasyCacheTTL">
+                    <span class="foun10ec-toggle-label">[{oxmultilang ident="EC_LABEL_TTL"}]</span>
+                </label>
+                <input type="number" min="1" step="1" id="foun10EasyCacheTTL" name="foun10EasyCacheTTL" value="[{$easyCacheTTL}]" class="foun10ec-ttl-input">
+                <p class="foun10ec-hint">[{oxmultilang ident="EC_HINT_TTL"}]</p>
+            </div>
+
+            <div class="foun10ec-field-row">
+                <label for="foun10EasyCacheWhitelist">
+                    <span class="foun10ec-toggle-label">[{oxmultilang ident="EC_LABEL_WHITELIST"}]</span>
+                </label>
+                <input type="text" id="foun10EasyCacheWhitelist" name="foun10EasyCacheWhitelist" value="[{$easyCacheWhitelist}]" class="foun10ec-whitelist-input">
+                <p class="foun10ec-hint">[{oxmultilang ident="EC_HINT_WHITELIST"}]</p>
+            </div>
+
+            <div class="foun10ec-toggle-row">
+                <input type="hidden" name="foun10EasyCacheSaveStats" value="0">
+                <input type="checkbox" id="foun10EasyCacheSaveStats" name="foun10EasyCacheSaveStats" value="1" [{if $easyCacheSaveStats}]checked[{/if}]>
+                <label for="foun10EasyCacheSaveStats">
+                    <span class="foun10ec-toggle-label">[{oxmultilang ident="EC_LABEL_SAVE_STATS"}]</span>
+                    <p class="foun10ec-hint">[{oxmultilang ident="EC_HINT_SAVE_STATS"}]</p>
+                </label>
+            </div>
+
+            <div class="foun10ec-toggle-row">
+                <input type="hidden" name="foun10EasyCacheGzip" value="0">
+                <input type="checkbox" id="foun10EasyCacheGzip" name="foun10EasyCacheGzip" value="1" [{if $easyCacheGzip}]checked[{/if}]>
+                <label for="foun10EasyCacheGzip">
+                    <span class="foun10ec-toggle-label">[{oxmultilang ident="EC_LABEL_GZIP"}]</span>
+                    <p class="foun10ec-hint">[{oxmultilang ident="EC_HINT_GZIP"}]</p>
+                    [{if !$easyCacheGzipAvailable}]
+                        <p class="foun10ec-hint foun10ec-hint-warn">[{oxmultilang ident="EC_HINT_GZIP_UNAVAILABLE"}]</p>
+                    [{/if}]
+                </label>
+            </div>
+
+            <div class="foun10ec-toggle-row">
+                <input type="hidden" name="foun10EasyCacheMinify" value="0">
+                <input type="checkbox" id="foun10EasyCacheMinify" name="foun10EasyCacheMinify" value="1" [{if $easyCacheMinify}]checked[{/if}]>
+                <label for="foun10EasyCacheMinify">
+                    <span class="foun10ec-toggle-label">[{oxmultilang ident="EC_LABEL_MINIFY"}]</span>
+                    <p class="foun10ec-hint">[{oxmultilang ident="EC_HINT_MINIFY"}]</p>
+                    [{if !$easyCacheMinifyAvailable}]
+                        <p class="foun10ec-hint foun10ec-hint-warn">[{oxmultilang ident="EC_HINT_MINIFY_UNAVAILABLE"}]</p>
+                    [{/if}]
+                </label>
+            </div>
+
+            <p class="foun10ec-hint foun10ec-hint-warn">[{oxmultilang ident="EC_HINT_DEPLOY"}]</p>
+
+            <div class="foun10ec-actions">
+                <button type="submit" class="btn btn-default">[{oxmultilang ident="EC_BUTTON_SAVE"}]</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+[{include file="bottomitem.tpl"}]

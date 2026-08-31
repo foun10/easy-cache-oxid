@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OX>
+    <OXMENU id="FOUN10_MODULES">
+        <MAINMENU id="FOUN10_EASYCACHE">
+            <SUBMENU id="FOUN10_EASYCACHE_SETTINGS" cl="foun10_easycache_settings" />
+            <SUBMENU id="FOUN10_EASYCACHE_STATS" cl="foun10_easycache_stats" />
+            <SUBMENU id="FOUN10_EASYCACHE_CLEAR" cl="foun10_easycache_clear" />
+        </MAINMENU>
+    </OXMENU>
+</OX>

@@ -1,0 +1,5 @@
+services:
+  foun10\EasyCache\Command\CacheClearCommand:
+    class: foun10\EasyCache\Command\CacheClearCommand
+    tags:
+      - { name: 'console.command' }

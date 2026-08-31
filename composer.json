@@ -1,0 +1,60 @@
+{
+  "name": "foun10/easycache",
+  "description": "Performant file-based full-page cache for OXID eShop",
+  "type": "oxideshop-module",
+  "keywords": [
+    "oxid",
+    "modules",
+    "eShop",
+    "cache",
+    "performance"
+  ],
+  "homepage": "https://www.foun10.de",
+  "license": "GPL-3.0-only",
+  "authors": [
+    {
+      "name": "foun10 GmbH",
+      "email": "info@foun10.de"
+    }
+  ],
+  "extra": {
+    "oxideshop": {
+      "target-directory": "foun10/EasyCache",
+      "blacklist-filter": [
+        "tests/**/*",
+        "vendor/**/*",
+        "phpunit.xml",
+        "composer.lock",
+        ".github/**/*"
+      ]
+    }
+  },
+  "require": {
+    "php": "^7.4 || ^8.0"
+  },
+  "suggest": {
+    "foun10/deepl": "Adds the visitor's on-demand language to the cache key, so translated pages are cached separately instead of colliding",
+    "voku/html-min": "^4.4 - enables the optional HTML minification of cached pages. Without it the module works normally and the minify setting stays inert."
+  },
+  "autoload": {
+    "psr-4": {
+      "foun10\\EasyCache\\": "./src"
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.6"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "foun10\\EasyCache\\Tests\\": "./tests"
+    }
+  },
+  "scripts": {
+    "tests-unit": "phpunit --testsuite unit",
+    "tests-mutation": "infection --threads=4 --min-covered-msi=58 --no-interaction",
+    "tests-integration": "phpunit -c phpunit.integration.xml"
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
