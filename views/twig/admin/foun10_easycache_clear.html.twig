@@ -1,4 +1,4 @@
-[{include file="headitem.tpl" title="foun10 EasyCache"}]
+{% include "headitem.html.twig" with {title: "foun10 EasyCache"} %}
 
 <style>
     .foun10ec-wrap { padding: 4px 14px 20px; }
@@ -27,60 +27,60 @@
 
 <div class="foun10ec-wrap">
     <div class="foun10ec-header">
-        <h1>[{oxmultilang ident="FOUN10_EASYCACHE"}]</h1>
-        [{if $easyCacheEnabled}]
-            <span class="foun10ec-badge foun10ec-badge-on">[{oxmultilang ident="EC_STATUS_ENABLED"}]</span>
-        [{else}]
-            <span class="foun10ec-badge foun10ec-badge-off">[{oxmultilang ident="EC_STATUS_DISABLED"}]</span>
-        [{/if}]
+        <h1>{{ translate({ ident: "FOUN10_EASYCACHE" }) }}</h1>
+        {% if easyCacheEnabled %}
+            <span class="foun10ec-badge foun10ec-badge-on">{{ translate({ ident: "EC_STATUS_ENABLED" }) }}</span>
+        {% else %}
+            <span class="foun10ec-badge foun10ec-badge-off">{{ translate({ ident: "EC_STATUS_DISABLED" }) }}</span>
+        {% endif %}
     </div>
 
-    [{if $easyCacheLastAction == "clearcache"}]
-        <div class="foun10ec-msg foun10ec-msg-success">[{oxmultilang ident="EC_MSG_CACHE_CLEARED"}] ([{$easyCacheClearedCount}] [{oxmultilang ident="EC_MSG_CACHE_CLEARED_FILES"}])</div>
-    [{elseif ($easyCacheLastAction == "clearstart" || $easyCacheLastAction == "cleartag") && $easyCacheClearedTag}]
-        <div class="foun10ec-msg foun10ec-msg-success">[{oxmultilang ident="EC_MSG_TAG_CLEARED"}] &bdquo;[{$easyCacheClearedTag}]&ldquo; ([{$easyCacheClearedCount}] [{oxmultilang ident="EC_MSG_CACHE_CLEARED_FILES"}])</div>
-    [{/if}]
+    {% if easyCacheLastAction == "clearcache" %}
+        <div class="foun10ec-msg foun10ec-msg-success">{{ translate({ ident: "EC_MSG_CACHE_CLEARED" }) }} ({{ easyCacheClearedCount }} {{ translate({ ident: "EC_MSG_CACHE_CLEARED_FILES" }) }})</div>
+    {% elseif (easyCacheLastAction == "clearstart" or easyCacheLastAction == "cleartag") and easyCacheClearedTag %}
+        <div class="foun10ec-msg foun10ec-msg-success">{{ translate({ ident: "EC_MSG_TAG_CLEARED" }) }} &bdquo;{{ easyCacheClearedTag }}&ldquo; ({{ easyCacheClearedCount }} {{ translate({ ident: "EC_MSG_CACHE_CLEARED_FILES" }) }})</div>
+    {% endif %}
 
     <div class="foun10ec-card">
-        <h2>[{oxmultilang ident="EC_SECTION_CLEAR_ALL"}]</h2>
-        <p class="foun10ec-hint">[{oxmultilang ident="EC_HINT_CLEAR_CACHE"}]</p>
-        <form action="[{$oViewConf->getSelfLink()}]" method="post" onsubmit="return confirm('[{oxmultilang ident="EC_CONFIRM_CLEAR_CACHE"}]');">
-            [{$oViewConf->getHiddenSid()}]
-            <input type="hidden" name="cl" value="[{$oViewConf->getActiveClassName()}]">
+        <h2>{{ translate({ ident: "EC_SECTION_CLEAR_ALL" }) }}</h2>
+        <p class="foun10ec-hint">{{ translate({ ident: "EC_HINT_CLEAR_CACHE" }) }}</p>
+        <form action="{{ oViewConf.getSelfLink() }}" method="post" onsubmit="return confirm('{{ translate({ ident: "EC_CONFIRM_CLEAR_CACHE" }) }}');">
+            {{ oViewConf.getHiddenSid()|raw }}
+            <input type="hidden" name="cl" value="{{ oViewConf.getActiveClassName() }}">
             <input type="hidden" name="fnc" value="clearcache">
-            <button type="submit" class="btn btn-default">[{oxmultilang ident="EC_BUTTON_CLEAR_CACHE"}]</button>
+            <button type="submit" class="btn btn-default">{{ translate({ ident: "EC_BUTTON_CLEAR_CACHE" }) }}</button>
         </form>
     </div>
 
     <div class="foun10ec-card">
-        <h2>[{oxmultilang ident="EC_SECTION_CLEAR_START"}]</h2>
-        <p class="foun10ec-hint">[{oxmultilang ident="EC_HINT_CLEAR_START"}]</p>
-        <form action="[{$oViewConf->getSelfLink()}]" method="post">
-            [{$oViewConf->getHiddenSid()}]
-            <input type="hidden" name="cl" value="[{$oViewConf->getActiveClassName()}]">
+        <h2>{{ translate({ ident: "EC_SECTION_CLEAR_START" }) }}</h2>
+        <p class="foun10ec-hint">{{ translate({ ident: "EC_HINT_CLEAR_START" }) }}</p>
+        <form action="{{ oViewConf.getSelfLink() }}" method="post">
+            {{ oViewConf.getHiddenSid()|raw }}
+            <input type="hidden" name="cl" value="{{ oViewConf.getActiveClassName() }}">
             <input type="hidden" name="fnc" value="clearstart">
-            <button type="submit" class="btn btn-default">[{oxmultilang ident="EC_BUTTON_CLEAR_START"}]</button>
+            <button type="submit" class="btn btn-default">{{ translate({ ident: "EC_BUTTON_CLEAR_START" }) }}</button>
         </form>
     </div>
 
     <div class="foun10ec-card">
-        <h2>[{oxmultilang ident="EC_SECTION_CLEAR_TAG"}]</h2>
-        <p class="foun10ec-hint">[{oxmultilang ident="EC_HINT_CLEAR_TAG"}]</p>
+        <h2>{{ translate({ ident: "EC_SECTION_CLEAR_TAG" }) }}</h2>
+        <p class="foun10ec-hint">{{ translate({ ident: "EC_HINT_CLEAR_TAG" }) }}</p>
 
         <div class="foun10ec-search-row">
             <select id="foun10ec-tagtype">
-                <option value="product" data-placeholder="[{oxmultilang ident="EC_SEARCH_PLACEHOLDER_PRODUCT"}]">[{oxmultilang ident="EC_TAGTYPE_PRODUCT"}]</option>
-                <option value="category" data-placeholder="[{oxmultilang ident="EC_SEARCH_PLACEHOLDER_CATEGORY"}]">[{oxmultilang ident="EC_TAGTYPE_CATEGORY"}]</option>
-                <option value="manufacturer" data-placeholder="[{oxmultilang ident="EC_SEARCH_PLACEHOLDER_MANUFACTURER"}]">[{oxmultilang ident="EC_TAGTYPE_MANUFACTURER"}]</option>
+                <option value="product" data-placeholder="{{ translate({ ident: "EC_SEARCH_PLACEHOLDER_PRODUCT" }) }}">{{ translate({ ident: "EC_TAGTYPE_PRODUCT" }) }}</option>
+                <option value="category" data-placeholder="{{ translate({ ident: "EC_SEARCH_PLACEHOLDER_CATEGORY" }) }}">{{ translate({ ident: "EC_TAGTYPE_CATEGORY" }) }}</option>
+                <option value="manufacturer" data-placeholder="{{ translate({ ident: "EC_SEARCH_PLACEHOLDER_MANUFACTURER" }) }}">{{ translate({ ident: "EC_TAGTYPE_MANUFACTURER" }) }}</option>
             </select>
-            <input type="text" id="foun10ec-search-term" placeholder="[{oxmultilang ident="EC_SEARCH_PLACEHOLDER_PRODUCT"}]" autocomplete="off">
+            <input type="text" id="foun10ec-search-term" placeholder="{{ translate({ ident: "EC_SEARCH_PLACEHOLDER_PRODUCT" }) }}" autocomplete="off">
         </div>
 
         <ul class="foun10ec-search-results" id="foun10ec-search-results"></ul>
 
-        <form action="[{$oViewConf->getSelfLink()}]" method="post" id="foun10ec-cleartag-form">
-            [{$oViewConf->getHiddenSid()}]
-            <input type="hidden" name="cl" value="[{$oViewConf->getActiveClassName()}]">
+        <form action="{{ oViewConf.getSelfLink() }}" method="post" id="foun10ec-cleartag-form">
+            {{ oViewConf.getHiddenSid()|raw }}
+            <input type="hidden" name="cl" value="{{ oViewConf.getActiveClassName() }}">
             <input type="hidden" name="fnc" value="cleartag">
             <input type="hidden" name="tagtype" id="foun10ec-selected-type">
             <input type="hidden" name="tagid" id="foun10ec-selected-id">
@@ -88,7 +88,7 @@
             <div class="foun10ec-selected" id="foun10ec-selected-label"></div>
 
             <div class="foun10ec-actions">
-                <button type="submit" class="btn btn-default" id="foun10ec-cleartag-submit" disabled>[{oxmultilang ident="EC_BUTTON_CLEAR_TAG"}]</button>
+                <button type="submit" class="btn btn-default" id="foun10ec-cleartag-submit" disabled>{{ translate({ ident: "EC_BUTTON_CLEAR_TAG" }) }}</button>
             </div>
         </form>
     </div>
@@ -96,7 +96,7 @@
 
 <script>
 (function () {
-    var baseUrl = '[{$oViewConf->getSelfLink()|replace:"&amp;":"&"}]&cl=[{$oViewConf->getActiveClassName()}]';
+    var baseUrl = '{{ oViewConf.getSelfLink()|replace({"&amp;": "&"})|raw }}&cl={{ oViewConf.getActiveClassName() }}';
     var typeSelect = document.getElementById('foun10ec-tagtype');
     var termInput = document.getElementById('foun10ec-search-term');
     var resultsList = document.getElementById('foun10ec-search-results');
@@ -126,7 +126,7 @@
         if (!items.length) {
             var empty = document.createElement('li');
             empty.className = 'foun10ec-search-empty';
-            empty.textContent = '[{oxmultilang ident="EC_SEARCH_EMPTY"}]';
+            empty.textContent = '{{ translate({ ident: 'EC_SEARCH_EMPTY' })|e('js') }}';
             resultsList.appendChild(empty);
             resultsList.style.display = 'block';
             return;
@@ -138,7 +138,7 @@
             li.addEventListener('click', function () {
                 selectedType.value = typeSelect.value;
                 selectedId.value = item.id;
-                selectedLabel.textContent = '[{oxmultilang ident="EC_SELECTED_LABEL"}]: ' + item.label;
+                selectedLabel.textContent = '{{ translate({ ident: 'EC_SELECTED_LABEL' })|e('js') }}: ' + item.label;
                 submitButton.disabled = false;
                 hideResults();
             });
@@ -192,4 +192,4 @@
 })();
 </script>
 
-[{include file="bottomitem.tpl"}]
+{% include "bottomitem.html.twig" %}

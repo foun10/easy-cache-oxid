@@ -3,8 +3,8 @@
 [![CI b-7.x](https://img.shields.io/github/actions/workflow/status/foun10/easy-cache-oxid/ci.yml?branch=b-7.x&label=CI%20b-7.x)](https://github.com/foun10/easy-cache-oxid/actions/workflows/ci.yml?query=branch%3Ab-7.x)
 [![CI b-6.x](https://img.shields.io/github/actions/workflow/status/foun10/easy-cache-oxid/ci.yml?branch=b-6.x&label=CI%20b-6.x)](https://github.com/foun10/easy-cache-oxid/actions/workflows/ci.yml?query=branch%3Ab-6.x)
 [![Latest Release](https://img.shields.io/github/v/release/foun10/easy-cache-oxid?sort=semver)](https://github.com/foun10/easy-cache-oxid/releases)
-[![PHP](https://img.shields.io/badge/PHP-%5E7.4%20%7C%7C%20%5E8.0-777BB4?logo=php&logoColor=white)](#compatibility)
-[![OXID eShop](https://img.shields.io/badge/OXID%20eShop-6.2%20%E2%80%93%206.5-e30613)](#compatibility)
+[![PHP](https://img.shields.io/badge/PHP-%5E8.0-777BB4?logo=php&logoColor=white)](#compatibility)
+[![OXID eShop](https://img.shields.io/badge/OXID%20eShop-7.0%20%E2%80%93%207.5-e30613)](#compatibility)
 [![License](https://img.shields.io/badge/license-GPL--3.0--only-blue)](LICENSE)
 
 > A file-based full-page cache for OXID eShop. Selected storefront pages are stored as finished
@@ -30,10 +30,12 @@ This is not a statement of intent — if a combination is listed here, CI proves
 
 | OXID eShop | PHP |
 |---|---|
-| 6.2 | 7.4 |
-| 6.3 | 7.4, 8.0 |
-| 6.4 | 7.4, 8.0 |
-| 6.5 | 7.4, 8.0, 8.1 |
+| 7.0 | 8.0, 8.1 |
+| 7.1 | 8.1, 8.2 |
+| 7.2 | 8.2, 8.3 |
+| 7.3 | 8.2, 8.3, 8.4 |
+| 7.4 | 8.2, 8.3, 8.4 |
+| 7.5 | 8.3, 8.4, 8.5 |
 
 <!-- ci-matrix:end -->
 

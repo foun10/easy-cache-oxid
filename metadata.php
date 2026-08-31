@@ -19,7 +19,7 @@ $aModule = [
         'de' => 'Dateibasierter Full-Page-Cache für ausgewählte Shop-Seiten.',
         'en' => 'File-based full-page cache for selected storefront pages.',
     ],
-    'version' => '6.0.0',
+    'version' => '7.0.0',
     'author' => 'foun10 GmbH',
     'email' => 'info@foun10.de',
     'extend' => [
@@ -34,11 +34,10 @@ $aModule = [
         'foun10_easycache_stats' => StatsController::class,
         'foun10_easycache_clear' => ClearController::class,
     ],
-    'templates' => [
-        'foun10_easycache_settings.tpl' => 'foun10/EasyCache/views/admin/tpl/foun10_easycache_settings.tpl',
-        'foun10_easycache_stats.tpl' => 'foun10/EasyCache/views/admin/tpl/foun10_easycache_stats.tpl',
-        'foun10_easycache_clear.tpl' => 'foun10/EasyCache/views/admin/tpl/foun10_easycache_clear.tpl',
-    ],
+    // Empty on purpose: OXID 7 mounts views/twig/ as a Twig namespace under the
+    // module id automatically, so templates are referenced as
+    // '@foun10EasyCache/admin/<name>.html.twig' instead of being registered here.
+    'templates' => [],
     'settings' => [
         [
             'group' => 'foun10EasyCache',

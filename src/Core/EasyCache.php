@@ -6,6 +6,8 @@ namespace foun10\EasyCache\Core;
 use foun10\DeepL\Core\DeepL;
 use OxidEsales\Eshop\Core\Controller\BaseController;
 use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
 use Throwable;
 use voku\helper\HtmlMin;
 
@@ -88,11 +90,6 @@ class EasyCache
      * Collaborators and every shop lookup below sit behind seams so the class can be
      * constructed and driven without a running shop. Nothing is resolved in the
      * constructor - a `new EasyCache()` in a unit test must not need a Registry.
-     *
-     * The seam names are identical on the 2.x branch; only the settings implementation
-     * differs there, because OXID 7 keeps module settings in var/configuration rather
-     * than in oxconfig. Keeping the shape the same lets both branches share the whole
-     * test suite unchanged.
      */
     protected function getStorage(): CacheStorageInterface
     {
@@ -117,21 +114,6 @@ class EasyCache
         return $this->stats;
     }
 
-    protected function getModuleSettingBoolean(string $name): bool
-    {
-        return (bool) Registry::getConfig()->getConfigParam($name);
-    }
-
-    protected function getModuleSettingString(string $name): string
-    {
-        return (string) Registry::getConfig()->getConfigParam($name);
-    }
-
-    protected function getModuleSettingCollection(string $name): array
-    {
-        return (array) Registry::getConfig()->getConfigParam($name);
-    }
-
     protected function isAdminMode(): bool
     {
         return (bool) Registry::getConfig()->isAdmin();
@@ -150,6 +132,37 @@ class EasyCache
     protected function getSession()
     {
         return Registry::getSession();
+    }
+
+    /**
+     * Module settings live in var/configuration on OXID 7 - Config::getConfigParam()
+     * returns null for them, with no error and no log entry, which would leave the
+     * whole module silently inert. They have to go through the module setting
+     * service; only genuine core params (sShopDir above) still come from Config.
+     *
+     * Wrapped in these three seams so unit tests can substitute settings without a
+     * container.
+     */
+    protected function getModuleSettingBoolean(string $name): bool
+    {
+        return (bool) $this->getModuleSettingService()->getBoolean($name, self::MODULE_ID);
+    }
+
+    protected function getModuleSettingString(string $name): string
+    {
+        return (string) $this->getModuleSettingService()->getString($name, self::MODULE_ID);
+    }
+
+    protected function getModuleSettingCollection(string $name): array
+    {
+        return (array) $this->getModuleSettingService()->getCollection($name, self::MODULE_ID);
+    }
+
+    protected function getModuleSettingService(): ModuleSettingServiceInterface
+    {
+        return ContainerFactory::getInstance()
+            ->getContainer()
+            ->get(ModuleSettingServiceInterface::class);
     }
 
     public function isEnabled(): bool
@@ -631,9 +644,10 @@ class EasyCache
     {
         $session = $this->getSession();
 
-        // Cast, don't trust: the session getters are not contractually strings -
-        // on the OXID 7 line getId() returns null, and str_replace() would raise a
-        // TypeError under strict_types. Harmless here, identical to the 2.x branch.
+        // Cast, don't trust: OXID 7's Session::getId() returns null where the 6.x
+        // line returned an empty string, so the !== '' guard lets it through and
+        // str_replace() raises a TypeError under strict_types - taking the whole
+        // page down on the first cache write.
         $stoken = (string) $session->getSessionChallengeToken();
         if ($stoken !== '') {
             $html = str_replace($stoken, self::PLACEHOLDER_STOKEN, $html);

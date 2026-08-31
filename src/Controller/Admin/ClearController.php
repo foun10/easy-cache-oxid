@@ -22,7 +22,7 @@ use OxidEsales\Eshop\Core\Registry;
  */
 class ClearController extends AdminController
 {
-    protected $_sThisTemplate = 'foun10_easycache_clear.tpl';
+    protected $_sThisTemplate = '@foun10EasyCache/admin/foun10_easycache_clear.html.twig';
 
     protected const SEARCHABLE_TYPES = ['product', 'category', 'manufacturer'];
     protected const MIN_SEARCH_LENGTH = 2;

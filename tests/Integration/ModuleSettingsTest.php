@@ -5,55 +5,68 @@ declare(strict_types=1);
 namespace foun10\EasyCache\Tests\Integration;
 
 use foun10\EasyCache\Core\EasyCache;
-use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Settings have to arrive in the module through whatever store the running shop actually uses.
  *
  * This is the one thing a unit test can never prove, because the unit suite substitutes the
- * setting seams by design. On this line the store is oxconfig, addressed with the
- * 'module:' prefix - the 2.x branch has the same test against OXID 7's configuration
- * directory, which is why the seams carry the same names on both branches.
+ * setting seams by design. The failure it guards against is completely silent: read module
+ * settings through Config::getConfigParam() and the OXID 7 line hands back null for every one
+ * of them - no error, no log entry, the cache simply never engages and every request reports
+ * BYPASS forever. It is the same bug that once made the DeepL module's API key unreachable.
  */
 class ModuleSettingsTest extends TestCase
 {
-    /** @var array */
-    private $originalValues = [];
+    /** @var ModuleSettingServiceInterface */
+    private $settingService;
 
-    private const SETTINGS = [
-        'foun10EasyCacheEnabled' => 'bool',
-        'foun10EasyCacheSaveStats' => 'bool',
-        'foun10EasyCacheGzip' => 'bool',
-        'foun10EasyCacheMinify' => 'bool',
-        'foun10EasyCacheTTL' => 'str',
-        'foun10EasyCacheWhitelist' => 'arr',
+    /** @var array */
+    private $originalBooleans = [];
+
+    /** @var string */
+    private $originalTtl = '';
+
+    /** @var array */
+    private $originalWhitelist = [];
+
+    private const BOOLEAN_SETTINGS = [
+        'foun10EasyCacheEnabled',
+        'foun10EasyCacheSaveStats',
+        'foun10EasyCacheGzip',
+        'foun10EasyCacheMinify',
     ];
 
     protected function setUp(): void
     {
-        $config = Registry::getConfig();
+        $this->settingService = ContainerFactory::getInstance()
+            ->getContainer()
+            ->get(ModuleSettingServiceInterface::class);
 
-        foreach (array_keys(self::SETTINGS) as $name) {
-            $this->originalValues[$name] = $config->getConfigParam($name);
+        foreach (self::BOOLEAN_SETTINGS as $name) {
+            $this->originalBooleans[$name] = $this->settingService->getBoolean($name, EasyCache::MODULE_ID);
         }
+
+        $this->originalTtl = (string) $this->settingService->getString('foun10EasyCacheTTL', EasyCache::MODULE_ID);
+        $this->originalWhitelist = (array) $this->settingService->getCollection(
+            'foun10EasyCacheWhitelist',
+            EasyCache::MODULE_ID
+        );
     }
 
     protected function tearDown(): void
     {
-        foreach ($this->originalValues as $name => $value) {
-            $this->saveSetting($name, $value);
+        foreach ($this->originalBooleans as $name => $value) {
+            $this->settingService->saveBoolean($name, $value, EasyCache::MODULE_ID);
         }
-    }
 
-    private function saveSetting(string $name, $value): void
-    {
-        Registry::getConfig()->saveShopConfVar(
-            self::SETTINGS[$name],
-            $name,
-            $value,
-            null,
-            'module:' . EasyCache::MODULE_ID
+        $this->settingService->saveString('foun10EasyCacheTTL', $this->originalTtl, EasyCache::MODULE_ID);
+        $this->settingService->saveCollection(
+            'foun10EasyCacheWhitelist',
+            $this->originalWhitelist,
+            EasyCache::MODULE_ID
         );
     }
 
@@ -61,16 +74,16 @@ class ModuleSettingsTest extends TestCase
     {
         $easyCache = oxNew(EasyCache::class);
 
-        $this->saveSetting('foun10EasyCacheEnabled', true);
+        $this->settingService->saveBoolean('foun10EasyCacheEnabled', true, EasyCache::MODULE_ID);
         $this->assertTrue($easyCache->isEnabled(), 'the module cannot see its own enabled flag');
 
-        $this->saveSetting('foun10EasyCacheEnabled', false);
+        $this->settingService->saveBoolean('foun10EasyCacheEnabled', false, EasyCache::MODULE_ID);
         $this->assertFalse($easyCache->isEnabled());
     }
 
     public function testTheLifetimeReachesTheModule(): void
     {
-        $this->saveSetting('foun10EasyCacheTTL', '1234');
+        $this->settingService->saveString('foun10EasyCacheTTL', '1234', EasyCache::MODULE_ID);
 
         $this->assertSame(1234, oxNew(EasyCache::class)->getTtl());
     }
@@ -82,11 +95,17 @@ class ModuleSettingsTest extends TestCase
      */
     public function testTheWhitelistReachesTheModule(): void
     {
-        $this->saveSetting('foun10EasyCacheWhitelist', ['start', 'content']);
+        $this->settingService->saveCollection(
+            'foun10EasyCacheWhitelist',
+            ['start', 'content'],
+            EasyCache::MODULE_ID
+        );
 
         $this->assertSame(
             ['start', 'content'],
-            array_values((array) Registry::getConfig()->getConfigParam('foun10EasyCacheWhitelist'))
+            array_values(
+                (array) $this->settingService->getCollection('foun10EasyCacheWhitelist', EasyCache::MODULE_ID)
+            )
         );
     }
 
@@ -94,7 +113,7 @@ class ModuleSettingsTest extends TestCase
     {
         $easyCache = oxNew(EasyCache::class);
 
-        $this->saveSetting('foun10EasyCacheSaveStats', true);
+        $this->settingService->saveBoolean('foun10EasyCacheSaveStats', true, EasyCache::MODULE_ID);
 
         $this->assertTrue($easyCache->isSaveStatsEnabled());
     }

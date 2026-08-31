@@ -8,10 +8,10 @@ Each OXID line has its own release series: `7.x` on the `b-7.x` branch for OXID 
 `b-6.x` branch for OXID 6 - the major version tracks the OXID line it targets, not a generation
 of the module. The two are developed in parallel, so a fix usually appears in both.
 
-## [6.0.0] - 2026-08-31
+## [7.0.0] - 2026-08-31
 
-First public release for OXID 6. The module existed internally before this; the public history
-and the version numbering start here.
+First public release for OXID 7. The major version matches the OXID major it targets, so this is
+the `7.x` line; `6.x` covers OXID 6 in parallel.
 
 ### Added
 
@@ -44,14 +44,12 @@ and the version numbering start here.
 
 ### Fixed
 
-- `foun10:easycache:clear` returned `void` from `execute()` where Symfony Console expects an
-  `int`. The console component shipped with OXID 6.2 coerces that silently, but the newer ones on
-  the upper half of this line raise a `TypeError` - the cache would be cleared and the command
-  would still exit non-zero, so a nightly cron mailed a fatal every night despite having done its
-  job.
-- Session values were passed to `str_replace()` unchecked. The guard against that is shared with
-  the `7.x` line, where an unset session id is `null` rather than an empty string; keeping both
-  lines identical here avoids a divergence that only shows up on one of them.
+- `foun10:easycache:clear` cleared the cache and then died with a `TypeError` and exit code 255,
+  because `execute()` returned `void` where Symfony Console requires an `int`. A nightly cron
+  would have mailed a fatal every night despite having done its job.
+- Session values were passed to `str_replace()` unchecked. On OXID 7 `Session::getId()` returns
+  `null` when no session was started, which raised a `TypeError` under `strict_types` and took
+  the whole page down on the first cache write.
 
 ### Known limitations
 

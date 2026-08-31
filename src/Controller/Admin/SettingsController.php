@@ -7,16 +7,19 @@ use foun10\EasyCache\Core\ControllerWhitelist;
 use foun10\EasyCache\Core\EasyCache;
 use OxidEsales\Eshop\Application\Controller\Admin\AdminController;
 use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
 
 /**
  * One-pager admin view for the EasyCache module's settings: the on/off
  * toggles (caching, stats collection, gzip storage, HTML minification),
- * the cache TTL and the controller whitelist. Stats and cache clearing live on their own SUBMENU
- * tabs (see StatsController/ClearController) - this page is settings only.
+ * the cache TTL and the controller whitelist. Stats and cache clearing live
+ * on their own SUBMENU tabs (see StatsController/ClearController) - this page
+ * is settings only.
  */
 class SettingsController extends AdminController
 {
-    protected $_sThisTemplate = 'foun10_easycache_settings.tpl';
+    protected $_sThisTemplate = '@foun10EasyCache/admin/foun10_easycache_settings.html.twig';
 
     public function render()
     {
@@ -42,22 +45,18 @@ class SettingsController extends AdminController
     }
 
     /**
-     * Saves the toggles. Stored the same way OXID stores any other module
-     * setting (oxconfig, module scoped) so getConfigParam() keeps working
-     * everywhere else unchanged.
+     * Saves the toggles through the module setting service - on OXID 7 that is
+     * the only store EasyCache::isEnabled() and friends read back from.
      */
     public function save()
     {
         $request = Registry::getRequest();
-        $config = Registry::getConfig();
-        $shopId = $config->getShopId();
+        $settingService = $this->getModuleSettingService();
 
-        $config->saveShopConfVar(
-            'bool',
+        $settingService->saveBoolean(
             'foun10EasyCacheEnabled',
             (bool) $request->getRequestEscapedParameter('foun10EasyCacheEnabled'),
-            $shopId,
-            'module:foun10EasyCache'
+            EasyCache::MODULE_ID
         );
 
         // Only saved when a positive number was actually submitted - a
@@ -66,50 +65,38 @@ class SettingsController extends AdminController
         // back to 3600 from anyway.
         $ttl = (int) $request->getRequestEscapedParameter('foun10EasyCacheTTL');
         if ($ttl > 0) {
-            $config->saveShopConfVar(
-                'str',
-                'foun10EasyCacheTTL',
-                (string) $ttl,
-                $shopId,
-                'module:foun10EasyCache'
-            );
+            $settingService->saveString('foun10EasyCacheTTL', (string) $ttl, EasyCache::MODULE_ID);
         }
 
         // Saved exactly as submitted, empty list included: clearing the field is
         // a legitimate way to stop caching everything without touching the
         // master switch, and the field always shows what is currently stored,
         // so an empty one is a deliberate edit rather than a slip.
-        $config->saveShopConfVar(
-            'arr',
+        $settingService->saveCollection(
             'foun10EasyCacheWhitelist',
             ControllerWhitelist::parse((string) $request->getRequestEscapedParameter('foun10EasyCacheWhitelist')),
-            $shopId,
-            'module:foun10EasyCache'
+            EasyCache::MODULE_ID
         );
 
-        $config->saveShopConfVar(
-            'bool',
-            'foun10EasyCacheSaveStats',
-            (bool) $request->getRequestEscapedParameter('foun10EasyCacheSaveStats'),
-            $shopId,
-            'module:foun10EasyCache'
-        );
+        foreach (['foun10EasyCacheSaveStats', 'foun10EasyCacheGzip', 'foun10EasyCacheMinify'] as $name) {
+            $settingService->saveBoolean(
+                $name,
+                (bool) $request->getRequestEscapedParameter($name),
+                EasyCache::MODULE_ID
+            );
+        }
+    }
 
-        $config->saveShopConfVar(
-            'bool',
-            'foun10EasyCacheGzip',
-            (bool) $request->getRequestEscapedParameter('foun10EasyCacheGzip'),
-            $shopId,
-            'module:foun10EasyCache'
-        );
-
-        $config->saveShopConfVar(
-            'bool',
-            'foun10EasyCacheMinify',
-            (bool) $request->getRequestEscapedParameter('foun10EasyCacheMinify'),
-            $shopId,
-            'module:foun10EasyCache'
-        );
+    /**
+     * OXID 7 keeps module settings in var/configuration rather than oxconfig, so
+     * the Config-based writer of the 6.x branch would store them where nothing
+     * reads them back.
+     */
+    protected function getModuleSettingService(): ModuleSettingServiceInterface
+    {
+        return ContainerFactory::getInstance()
+            ->getContainer()
+            ->get(ModuleSettingServiceInterface::class);
     }
 
     protected function getEasyCache(): EasyCache

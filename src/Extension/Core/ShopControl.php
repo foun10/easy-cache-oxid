@@ -19,10 +19,10 @@ class ShopControl extends ShopControl_parent
      * Times the DB/business-logic work init() always runs (hit or miss),
      * separately from render() below - reported via X-EasyCache-Timing.
      */
-    protected function _initializeViewObject($class, $function, $parameters = null, $viewsChain = null)
+    protected function initializeViewObject($class, $function, $parameters = null, $viewsChain = null)
     {
         $start = microtime(true);
-        $view = parent::_initializeViewObject($class, $function, $parameters, $viewsChain);
+        $view = parent::initializeViewObject($class, $function, $parameters, $viewsChain);
         $this->easyCacheInitMs = (microtime(true) - $start) * 1000;
 
         return $view;

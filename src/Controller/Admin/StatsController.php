@@ -16,7 +16,7 @@ use OxidEsales\Eshop\Core\Registry;
  */
 class StatsController extends AdminController
 {
-    protected $_sThisTemplate = 'foun10_easycache_stats.tpl';
+    protected $_sThisTemplate = '@foun10EasyCache/admin/foun10_easycache_stats.html.twig';
 
     public function render()
     {

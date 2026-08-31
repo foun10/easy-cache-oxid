@@ -1,0 +1,135 @@
+{% include "headitem.html.twig" with {title: "foun10 EasyCache"} %}
+
+<style>
+    .foun10ec-wrap { padding: 4px 14px 20px; }
+    .foun10ec-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .foun10ec-header h1 { margin: 0; }
+    .foun10ec-badge { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: .03em; }
+    .foun10ec-badge-on { background: #dff0d8; color: #3c763d; border: 1px solid #b2d8a8; }
+    .foun10ec-badge-off { background: #f2f2f2; color: #777; border: 1px solid #ddd; }
+    .foun10ec-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; padding: 14px 16px; margin-bottom: 16px; }
+    .foun10ec-card h2 { font-size: 14px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: .03em; color: #555; }
+    .foun10ec-card-header-row { display: flex; align-items: center; justify-content: space-between; }
+    .foun10ec-card-header-row h2 { margin: 0 0 10px; }
+    .foun10ec-btn-sm { padding: 2px 10px; font-size: 12px; }
+    .foun10ec-hint { color: #777; font-size: 12px; margin: 2px 0 0; }
+    .foun10ec-msg { padding: 8px 12px; border-radius: 3px; margin-bottom: 14px; }
+    .foun10ec-msg-success { background: #dff0d8; color: #3c763d; border: 1px solid #b2d8a8; }
+    .foun10ec-stats-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .foun10ec-stats-table th, .foun10ec-stats-table td { padding: 7px 10px; border-bottom: 1px solid #eee; text-align: right; }
+    .foun10ec-stats-table th:first-child, .foun10ec-stats-table td:first-child { text-align: left; }
+    .foun10ec-stats-table th { color: #555; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; border-bottom: 2px solid #ddd; }
+    .foun10ec-stats-table tfoot td { font-weight: bold; border-top: 2px solid #ddd; border-bottom: none; }
+    .foun10ec-ratio-cell { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+    .foun10ec-ratio-bar { width: 70px; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
+    .foun10ec-ratio-bar-fill { display: block; height: 100%; background: #5cb85c; }
+    .foun10ec-empty { color: #888; font-style: italic; padding: 6px 0; }
+    .foun10ec-actions { margin-top: 12px; }
+</style>
+
+<div class="foun10ec-wrap">
+    <div class="foun10ec-header">
+        <h1>{{ translate({ ident: "FOUN10_EASYCACHE" }) }}</h1>
+        {% if easyCacheEnabled %}
+            <span class="foun10ec-badge foun10ec-badge-on">{{ translate({ ident: "EC_STATUS_ENABLED" }) }}</span>
+        {% else %}
+            <span class="foun10ec-badge foun10ec-badge-off">{{ translate({ ident: "EC_STATUS_DISABLED" }) }}</span>
+        {% endif %}
+    </div>
+
+    {% if easyCacheLastAction == "resetstats" %}
+        <div class="foun10ec-msg foun10ec-msg-success">{{ translate({ ident: "EC_MSG_STATS_RESET" }) }}</div>
+    {% endif %}
+
+    <div class="foun10ec-card">
+        <h2>{{ translate({ ident: "EC_SECTION_CACHE_MANAGEMENT" }) }}</h2>
+
+        {% if easyCacheFileStats %}
+            <p>
+                {{ translate({ ident: "EC_FILE_STATS_LABEL" }) }}:
+                <strong>{{ easyCacheFileStats.count }}</strong> {{ translate({ ident: "EC_FILE_STATS_FILES" }) }},
+                <strong>{{ "%.1f"|format(easyCacheFileStats.sizeBytes / 1024 / 1024) }}</strong> MB
+            </p>
+        {% endif %}
+        <p class="foun10ec-hint">{{ translate({ ident: "EC_HINT_COUNT_FILES" }) }}</p>
+        <a class="btn btn-default" href="{{ oViewConf.getSelfLink()|replace({"&amp;": "&"})|raw }}&cl={{ oViewConf.getActiveClassName() }}&filecount=1">
+            {{ translate({ ident: "EC_BUTTON_COUNT_FILES" }) }}
+        </a>
+    </div>
+
+    <div class="foun10ec-card">
+        <div class="foun10ec-card-header-row">
+            <h2>{{ translate({ ident: "EC_SECTION_STATS" }) }}</h2>
+            <a class="btn btn-default foun10ec-btn-sm" href="{{ oViewConf.getSelfLink()|replace({"&amp;": "&"})|raw }}&cl={{ oViewConf.getActiveClassName() }}">{{ translate({ ident: "EC_BUTTON_RELOAD_STATS" }) }}</a>
+        </div>
+
+        {% if not easyCacheSaveStats %}
+            <p class="foun10ec-empty">{{ translate({ ident: "EC_STATS_DISABLED_HINT" }) }}</p>
+        {% elseif easyCacheStats|length == 0 %}
+            <p class="foun10ec-empty">{{ translate({ ident: "EC_STATS_EMPTY" }) }}</p>
+        {% else %}
+            {% set totalRequests = 0 %}
+            {% set totalHits = 0 %}
+            {% set totalMisses = 0 %}
+            {% set totalHitTimeMs = 0 %}
+            {% set totalMissTimeMs = 0 %}
+
+            <table class="foun10ec-stats-table">
+                <thead>
+                    <tr>
+                        <th>{{ translate({ ident: "EC_TABLE_VIEWCLASS" }) }}</th>
+                        <th>{{ translate({ ident: "EC_TABLE_REQUESTS" }) }}</th>
+                        <th>{{ translate({ ident: "EC_TABLE_HITS" }) }}</th>
+                        <th>{{ translate({ ident: "EC_TABLE_MISSES" }) }}</th>
+                        <th>{{ translate({ ident: "EC_TABLE_RATIO" }) }}</th>
+                        <th>{{ translate({ ident: "EC_TABLE_AVG_HIT_MS" }) }}</th>
+                        <th>{{ translate({ ident: "EC_TABLE_AVG_MISS_MS" }) }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in easyCacheStats %}
+                        {% set totalRequests = totalRequests + row.requests %}
+                        {% set totalHits = totalHits + row.hits %}
+                        {% set totalMisses = totalMisses + row.misses %}
+                        {% set totalHitTimeMs = totalHitTimeMs + row.hitTimeMs %}
+                        {% set totalMissTimeMs = totalMissTimeMs + row.missTimeMs %}
+                        <tr>
+                            <td>{{ row.viewclass }}</td>
+                            <td>{{ row.requests }}</td>
+                            <td>{{ row.hits }}</td>
+                            <td>{{ row.misses }}</td>
+                            <td>
+                                <div class="foun10ec-ratio-cell">
+                                    <span>{{ row.ratio }}&nbsp;%</span>
+                                    <span class="foun10ec-ratio-bar"><span class="foun10ec-ratio-bar-fill" style="width: {{ row.ratio }}%;"></span></span>
+                                </div>
+                            </td>
+                            <td>{% if row.avgHitMs is not null %}{{ row.avgHitMs }}&nbsp;ms{% else %}-{% endif %}</td>
+                            <td>{% if row.avgMissMs is not null %}{{ row.avgMissMs }}&nbsp;ms{% else %}-{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>{{ translate({ ident: "EC_TABLE_TOTAL" }) }}</td>
+                        <td>{{ totalRequests }}</td>
+                        <td>{{ totalHits }}</td>
+                        <td>{{ totalMisses }}</td>
+                        <td>{% if totalRequests > 0 %}{{ "%.1f"|format(totalHits * 100 / totalRequests) }}&nbsp;%{% else %}-{% endif %}</td>
+                        <td>{% if totalHits > 0 %}{{ "%.1f"|format(totalHitTimeMs / totalHits) }}&nbsp;ms{% else %}-{% endif %}</td>
+                        <td>{% if totalMisses > 0 %}{{ "%.1f"|format(totalMissTimeMs / totalMisses) }}&nbsp;ms{% else %}-{% endif %}</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <form action="{{ oViewConf.getSelfLink() }}" method="post" class="foun10ec-actions" onsubmit="return confirm('{{ translate({ ident: "EC_CONFIRM_RESET_STATS" }) }}');">
+                {{ oViewConf.getHiddenSid()|raw }}
+                <input type="hidden" name="cl" value="{{ oViewConf.getActiveClassName() }}">
+                <input type="hidden" name="fnc" value="resetstats">
+                <button type="submit" class="btn btn-default">{{ translate({ ident: "EC_BUTTON_RESET_STATS" }) }}</button>
+            </form>
+        {% endif %}
+    </div>
+</div>
+
+{% include "bottomitem.html.twig" %}
